@@ -5,7 +5,14 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/greet")
 public class GreetingController {
-    //UC1
+
+    private final GreetingService greetingService;
+
+    public GreetingController(GreetingService greetingService) {
+        this.greetingService = greetingService;
+    }
+
+    // UC1: Different HTTP Methods
     @PostMapping
     public String postGreeting() {
         return "{\"message\": \"Hello from POST\"}";
@@ -21,19 +28,10 @@ public class GreetingController {
         return "{\"message\": \"Hello from DELETE\"}";
     }
 
-
-
-    //UC2
-    private final GreetingService greetingService;
-
-    public GreetingController(GreetingService greetingService) {
-        this.greetingService = greetingService;
-    }
-
+    // UC2: Greeting with First Name, Last Name, or Default
     @GetMapping
-    public String getGreeting(@RequestParam(required = false) String firstName,
-                              @RequestParam(required = false) String lastName) {
-        return greetingService.getGreeting(firstName, lastName);
+    public Greeting getGreeting(@RequestParam(required = false) String firstName,
+                                @RequestParam(required = false) String lastName) {
+        return greetingService.saveGreeting(firstName, lastName);
     }
-
 }

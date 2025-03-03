@@ -4,16 +4,25 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class GreetingService {
+    private final GreetingRepository greetingRepository;
 
-    public String getGreeting(String firstName, String lastName) {
+    public GreetingService(GreetingRepository greetingRepository) {
+        this.greetingRepository = greetingRepository;
+    }
+
+    public Greeting saveGreeting(String firstName, String lastName) {
+        String message;
         if (firstName != null && lastName != null) {
-            return "{\"message\": \"Hello " + firstName + " " + lastName + "\"}";
+            message = "Hello " + firstName + " " + lastName;
         } else if (firstName != null) {
-            return "{\"message\": \"Hello " + firstName + "\"}";
+            message = "Hello " + firstName;
         } else if (lastName != null) {
-            return "{\"message\": \"Hello " + lastName + "\"}";
+            message = "Hello " + lastName;
         } else {
-            return "{\"message\": \"Hello World\"}";
+            message = "Hello World";
         }
+
+        Greeting greeting = new Greeting(message);
+        return greetingRepository.save(greeting);
     }
 }
