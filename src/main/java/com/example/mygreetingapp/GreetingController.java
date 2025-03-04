@@ -23,9 +23,14 @@ public class GreetingController {
         return greetingService.updateGreeting(id, message);
     }
 
-    @DeleteMapping
-    public String deleteGreeting() {
-        return "{\"message\": \"Hello from DELETE\"}";
+    @DeleteMapping("/{id}")
+    public String deleteGreeting(@PathVariable Long id) {
+        boolean deleted = greetingService.deleteGreeting(id);
+        if (deleted) {
+            return "{\"message\": \"Greeting deleted successfully\"}";
+        } else {
+            return "{\"error\": \"Greeting not found\"}";
+        }
     }
 
     @GetMapping

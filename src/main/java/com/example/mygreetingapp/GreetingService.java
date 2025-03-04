@@ -1,7 +1,6 @@
 package com.example.mygreetingapp;
 
 import org.springframework.stereotype.Service;
-import java.util.Optional;
 import java.util.List;
 
 @Service
@@ -37,12 +36,18 @@ public class GreetingService {
     }
 
     public Greeting updateGreeting(Long id, String newMessage) {
-        Optional<Greeting> optionalGreeting = greetingRepository.findById(id);
-        if (optionalGreeting.isPresent()) {
-            Greeting greeting = optionalGreeting.get();
-            greeting.setMessage(newMessage);
-            return greetingRepository.save(greeting);
+        return greetingRepository.findById(id)
+                .map(greeting -> {
+                    greeting.setMessage(newMessage);
+                    return greetingRepository.save(greeting);
+                }).orElse(null);
+    }
+
+    public boolean deleteGreeting(Long id) {
+        if (greetingRepository.existsById(id)) {
+            greetingRepository.deleteById(id);
+            return true;
         }
-        return null;
+        return false;
     }
 }
