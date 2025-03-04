@@ -18,9 +18,9 @@ public class GreetingController {
         return "{\"message\": \"Hello from POST\"}";
     }
 
-    @PutMapping
-    public String putGreeting() {
-        return "{\"message\": \"Hello from PUT\"}";
+    @PutMapping("/{id}")
+    public Greeting updateGreeting(@PathVariable Long id, @RequestParam String message) {
+        return greetingService.updateGreeting(id, message);
     }
 
     @DeleteMapping
