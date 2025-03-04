@@ -12,7 +12,6 @@ public class GreetingController {
         this.greetingService = greetingService;
     }
 
-    // UC1: Different HTTP Methods
     @PostMapping
     public String postGreeting() {
         return "{\"message\": \"Hello from POST\"}";
@@ -28,10 +27,14 @@ public class GreetingController {
         return "{\"message\": \"Hello from DELETE\"}";
     }
 
-    // UC2: Greeting with First Name, Last Name, or Default
     @GetMapping
     public Greeting getGreeting(@RequestParam(required = false) String firstName,
                                 @RequestParam(required = false) String lastName) {
         return greetingService.saveGreeting(firstName, lastName);
+    }
+
+    @GetMapping("/{id}")
+    public Greeting getGreetingById(@PathVariable Long id) {
+        return greetingService.getGreetingById(id);
     }
 }
