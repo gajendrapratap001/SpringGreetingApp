@@ -1,6 +1,5 @@
 package com.example.mygreetingapp.service;
 
-
 import com.example.mygreetingapp.dto.AuthUserDTO;
 import com.example.mygreetingapp.dto.LoginDTO;
 import com.example.mygreetingapp.model.AuthUser;
@@ -13,17 +12,19 @@ import java.util.Optional;
 import java.util.HashMap;
 import java.util.Map;
 
-
 @Service
 public class AuthenticationService {
 
-    AuthUserRepository authUserRepository;
-    EmailService emailService;
-    JwtUtil jwtUtil;
-    PasswordEncoder passwordEncoder;
+    private final AuthUserRepository authUserRepository;
+    private final EmailService emailService;
+    private final JwtUtil jwtUtil;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public AuthenticationService(AuthUserRepository authUserRepository, EmailService emailService, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
+    public AuthenticationService(AuthUserRepository authUserRepository,
+                                 EmailService emailService,
+                                 PasswordEncoder passwordEncoder,
+                                 JwtUtil jwtUtil) {
         this.authUserRepository = authUserRepository;
         this.emailService = emailService;
         this.passwordEncoder = passwordEncoder;
@@ -52,7 +53,6 @@ public class AuthenticationService {
         return "User registered successfully!";
     }
 
-
     public Map<String, String> loginUser(LoginDTO loginDTO) {
         Optional<AuthUser> user = authUserRepository.findByEmail(loginDTO.getEmail());
 
@@ -67,4 +67,43 @@ public class AuthenticationService {
 
         throw new RuntimeException("Invalid credentials");
     }
+
+    // 🔹 Forgot Password Implementation
+    public String forgotPassword(String email, String newPassword) {
+        Optional<AuthUser> userOptional = authUserRepository.findByEmail(email);
+
+        if (userOptional.isEmpty()) {
+            throw new RuntimeException("Sorry! We cannot find the user email: " + email);
+        }
+
+        AuthUser user = userOptional.get();
+        user.setPassword(passwordEncoder.encode(newPassword));
+        authUserRepository.save(user);
+
+        emailService.sendEmail(email, "Password Changed", "Your password has been updated successfully.");
+
+        return "Password has been changed successfully!";
+    }
+
+    public String resetPassword(String email, String currentPassword, String newPassword) {
+        Optional<AuthUser> userOptional = authUserRepository.findByEmail(email);
+
+        if (userOptional.isEmpty()) {
+            throw new RuntimeException("User not found with email: " + email);
+        }
+
+        AuthUser user = userOptional.get();
+
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new RuntimeException("Current password is incorrect!");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        authUserRepository.save(user);
+
+        emailService.sendEmail(email, "Password Reset", "Your password has been updated successfully.");
+
+        return "Password reset successfully!";
+    }
+
 }
