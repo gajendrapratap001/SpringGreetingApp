@@ -1,4 +1,4 @@
-package com.example.mygreetingapp;
+package com.example.mygreetingapp.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

@@ -1,28 +1,33 @@
-package com.example.mygreetingapp;
+package com.example.mygreetingapp.service;
 
+
+import com.example.mygreetingapp.dto.AuthUserDTO;
+import com.example.mygreetingapp.dto.LoginDTO;
+import com.example.mygreetingapp.model.AuthUser;
+import com.example.mygreetingapp.repository.AuthUserRepository;
+import com.example.mygreetingapp.security.JwtUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 
 
 @Service
 public class AuthenticationService {
 
-    private final AuthUserRepository authUserRepository;
-    private final EmailService emailService;
-    private final PasswordEncoder passwordEncoder;
+    AuthUserRepository authUserRepository;
+    EmailService emailService;
+    JwtUtil jwtUtil;
+    PasswordEncoder passwordEncoder;
 
     @Autowired
-    public AuthenticationService(AuthUserRepository authUserRepository, EmailService emailService, PasswordEncoder passwordEncoder) {
+    public AuthenticationService(AuthUserRepository authUserRepository, EmailService emailService, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
         this.authUserRepository = authUserRepository;
         this.emailService = emailService;
         this.passwordEncoder = passwordEncoder;
-    }
-
-    public String encodePassword(String rawPassword) {
-        return passwordEncoder.encode(rawPassword);
+        this.jwtUtil = jwtUtil;
     }
 
     public String registerUser(AuthUserDTO authUserDTO) {
@@ -48,11 +53,18 @@ public class AuthenticationService {
     }
 
 
-    public String loginUser(LoginDTO loginDTO) {
+    public Map<String, String> loginUser(LoginDTO loginDTO) {
         Optional<AuthUser> user = authUserRepository.findByEmail(loginDTO.getEmail());
+
         if (user.isPresent() && passwordEncoder.matches(loginDTO.getPassword(), user.get().getPassword())) {
-            return "Login successful!";
+            String token = jwtUtil.generateToken(loginDTO.getEmail());
+
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Login successful!");
+            response.put("token", token);
+            return response;
         }
+
         throw new RuntimeException("Invalid credentials");
     }
 }
